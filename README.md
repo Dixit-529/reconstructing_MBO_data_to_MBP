@@ -9,7 +9,7 @@ This project provides a C++ solution to reconstruct a Level 10 Market By Price (
 - `OrderBook.cpp`: Implementation file for the `OrderBook` class methods.
 - `main.cpp`: The main program logic for reading MBO data, processing it, and writing MBP-10 output.
 - `Makefile`: Used to compile the source code into an executable.
-- `Readme.txt`: This file.
+- `Readme.txt`: Explanation(text file).
 
 **2. Compilation Instructions:**
 ----------------------------
@@ -47,7 +47,7 @@ The program will generate an output CSV file named `mbp_output.csv` in the same 
   - **Minimal Copying:** Data is processed line by line, minimizing the need to load the entire dataset into memory.
   - **Direct Orderbook Manipulation:** Orderbook updates (add, delete, trade) directly modify the `std::map` containers, avoiding intermediate data structures where possible.
 
-## **5. Special Things to Take Note When Running Your Code / Logic Explanation:**
+## **5. Special Things to Take Note When Running  Code (Logic Explanation):**
 
 **a. Ignoring Initial Row:**
 

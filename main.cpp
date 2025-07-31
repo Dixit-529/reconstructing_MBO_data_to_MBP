@@ -1,11 +1,11 @@
-// main.cpp
 #include "OrderBook.h"
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <sstream>
 #include <vector>
-#include <iomanip> // For std::fixed and std::setprecision
+// For std::fixed and std::setprecision
+#include <iomanip> 
 
 #include <cmath>
 using std::isnan;
@@ -23,7 +23,7 @@ std::vector<std::string> parse_csv_line(const std::string& line) {
 
 int main(int argc, char* argv[]) {
     if (argc != 2) {
-        std::cerr << "Usage: " << argv[0] << " <input_file.csv>" << std::endl;
+        std::cerr << "provide " << argv[0] << "input_file.csv" << std::endl;
         return 1;
     }
 
@@ -56,7 +56,8 @@ int main(int argc, char* argv[]) {
         outfile << ",symbol,order_id\n";
     }
 
-    long long row_index = 0; // To match the "Unnamed: 0" column in sample mbp.csv
+    // To match the "Unnamed: 0" column in sample mbp.csv
+    long long row_index = 0; 
 
     // Read and process mbo.csv rows
     while (std::getline(infile, line)) {
@@ -65,10 +66,12 @@ int main(int argc, char* argv[]) {
         // Skip the initial row as this is a “clear[R]” action to clear the orderbook
         // -> Assume we are starting the day with an empty orderbook
         if (tokens[5] == "R" && row_index == 0) {
-            row_index++; // Increment row index even for skipped row to align with mbp.csv's first row
+            // Increment row index even for skipped row to align with mbp.csv's first row
+            row_index++; 
             continue;
         }
-        row_index++; // Increment for subsequent rows
+        // Increment for subsequent rows
+        row_index++; 
 
         // Extract relevant fields
         std::string ts_recv = tokens[0];
@@ -76,8 +79,8 @@ int main(int argc, char* argv[]) {
         int rtype = std::stoi(tokens[2]);
         int publisher_id = std::stoi(tokens[3]);
         int instrument_id = std::stoi(tokens[4]);
-        char action = tokens[5][0]; // Action is a single character
-        char side = tokens[6][0];   // Side is a single character
+        char action = tokens[5][0]; 
+        char side = tokens[6][0];   
 
         // Handle empty price for 'R' action or other cases
         double price = 0.0;
@@ -86,11 +89,13 @@ int main(int argc, char* argv[]) {
                 price = std::stod(tokens[7]);
             } catch (const std::invalid_argument& e) {
                 // Handle cases where price might be empty or invalid (e.g., for 'R' action)
-                price = 0.0; // Default to 0.0 or log error
+                // Default to 0.0 
+                price = 0.0; 
             }
         }
         long long size = std::stoll(tokens[8]);
-        // int channel_id = std::stoi(tokens[9]); // Removed: unused variable
+        // Removed: unused variable
+        // int channel_id = std::stoi(tokens[9]); 
         long long order_id = std::stoll(tokens[10]);
         int flags = std::stoi(tokens[11]);
         long long ts_in_delta = std::stoll(tokens[12]);
@@ -98,7 +103,8 @@ int main(int argc, char* argv[]) {
         std::string symbol = tokens[14];
 
 
-        // bool orderbook_changed = false; // Removed: unused variable
+        // Removed: unused variable
+        // bool orderbook_changed = false; 
 
         if (action == 'A') {
             order_book.add_order(side, price, size);
@@ -110,7 +116,7 @@ int main(int argc, char* argv[]) {
             // "If the side of the row with action ‘T’ is ‘N’, we should not alter the orderbook."
             if (side != 'N') {
                 // "combine these 3 actions in the MBO to a single T action in the MBP-10 output that does reflect in the orderbook."
-                // This implies that 'T' itself triggers the orderbook change on the *opposite* side.
+                // This implies that 'T' itself triggers the orderbook change on the opposite side.
                 // The price and size from the 'T' action are the traded price and size.
                 order_book.process_trade(side, price, size);
                 // orderbook_changed = true;
@@ -129,12 +135,15 @@ int main(int argc, char* argv[]) {
         order_book.get_10_snapshot(bid_levels, ask_levels);
 
         // Write to output file in the exact format of mbp.csv
-        outfile << row_index -1 << ","; // Unnamed: 0 column
+        // Unnamed: 0 column
+        outfile << row_index -1 << ","; 
         outfile << ts_recv << "," << ts_event << "," << rtype << "," << publisher_id << "," << instrument_id << ",";
-        outfile << action << "," << side << ",0,"; // Depth is 0 in sample mbp.csv for MBO derived rows.
+        // Depth is 0 in sample mbp.csv for MBO derived rows.
+        outfile << action << "," << side << ",0,"; 
         
         // Output price and size from MBO row
-        if (std::isnan(price)) { // Handle potential NaN for price field from MBO
+        // Handle potential NaN for price field from MBO
+        if (std::isnan(price)) { 
              outfile << ",";
         } else {
              outfile << std::fixed << std::setprecision(8) << price << ",";
@@ -147,7 +156,8 @@ int main(int argc, char* argv[]) {
         for (int i = 0; i < 10; ++i) {
             // Output NaN for empty price as per sample mbp.csv
             if (bid_levels[i].price == 0.0 && bid_levels[i].size == 0 && bid_levels[i].count == 0) {
-                 outfile << ",,0,0"; // Represents empty price, 0 for size and count
+                // Represents empty price, 0 for size and count
+                 outfile << ",,0,0"; 
             } else {
                  outfile << "," << std::fixed << std::setprecision(8) << bid_levels[i].price << "," << bid_levels[i].size << "," << bid_levels[i].count;
             }
@@ -156,7 +166,8 @@ int main(int argc, char* argv[]) {
         // Output ask levels
         for (int i = 0; i < 10; ++i) {
             if (ask_levels[i].price == 0.0 && ask_levels[i].size == 0 && ask_levels[i].count == 0) {
-                outfile << ",,0,0"; // Represents empty price, 0 for size and count
+                // Represents empty price, 0 for size and count
+                outfile << ",,0,0"; 
             } else {
                 outfile << "," << std::fixed << std::setprecision(8) << ask_levels[i].price << "," << ask_levels[i].size << "," << ask_levels[i].count;
             }

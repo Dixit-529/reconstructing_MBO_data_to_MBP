@@ -13,6 +13,10 @@ This project provides a C++ solution to reconstruct a Level 10 Market By Price (
 
 **2. Compilation Instructions:**
 ----------------------------
+Clone the repository
+```bash
+gh repo clone Dixit-529/reconstructing_MBO_data_to_MBP
+```
 To build the executable, navigate to the project directory in your terminal and run `make`:
 
 ```bash

@@ -1,6 +1,5 @@
-// OrderBook.cpp
 #include "OrderBook.h"
-#include <iostream> // For debugging
+#include <iostream> 
 
 OrderBook::OrderBook() {}
 
@@ -34,7 +33,8 @@ void OrderBook::delete_order(char side, double price, long long size) {
             it_price->second -= size;
             it_count->second--;
 
-            if (it_price->second <= 0) { // If size drops to 0 or below, remove the level
+            // If size drops to 0 or below, remove the level
+            if (it_price->second <= 0) { 
                 bids.erase(it_price);
                 bid_counts.erase(it_count);
             }
@@ -56,10 +56,10 @@ void OrderBook::delete_order(char side, double price, long long size) {
     }
 }
 
+// This function is included for completeness but is not strictly necessary for the provided mbo.csv.
+// If 'M' actions were present and explicitly meant a modification, this would handle it.
+// For aggregated MBP, a modification can be seen as deleting the old entry and adding a new one.
 void OrderBook::modify_order(char side, double old_price, long long old_size, double new_price, long long new_size) {
-    // This function is included for completeness but is not strictly necessary for the provided mbo.csv.
-    // If 'M' actions were present and explicitly meant a modification, this would handle it.
-    // For aggregated MBP, a modification can be seen as deleting the old entry and adding a new one.
     delete_order(side, old_price, old_size);
     add_order(side, new_price, new_size);
 }
@@ -69,37 +69,43 @@ void OrderBook::process_trade(char aggressor_side, double trade_price, long long
 
     long long remaining_trade_size = trade_size;
 
-    if (aggressor_side == 'A') { // Ask aggressor, consuming from Bid side
+    // Ask aggressor, consuming from Bid side
+    if (aggressor_side == 'A') { 
         // Iterate bids from best (highest price) to worst (lowest price)
         auto it = bids.begin();
         while (it != bids.end() && remaining_trade_size > 0) {
             double current_bid_price = it->first;
             long long current_bid_size = it->second;
 
-            // We consume bids at or below the trade price (from aggressor's perspective: fill at this price or better).
             // For an ASK aggressor, "better" means a lower or equal bid price.
-            if (current_bid_price >= trade_price) { // Assuming trade_price is the limit or better for the other side
+            // Assuming trade_price is the limit or better for the other side
+            if (current_bid_price >= trade_price) { 
                 long long consumed_size = std::min(remaining_trade_size, current_bid_size);
 
-                // Inline logic to reduce quantity
+                // to reduce quantity
                 it->second -= consumed_size;
-                bid_counts.at(current_bid_price)--; // Decrement count of orders at this level
+                // Decrement count of orders at this level
+                bid_counts.at(current_bid_price)--; 
 
                 remaining_trade_size -= consumed_size;
 
-                if (it->second <= 0) { // If the level is fully consumed
-                    it = bids.erase(it); // Erase returns iterator to the next element
-                    bid_counts.erase(current_bid_price); // Remove count entry
+                // If the level is fully consumed
+                if (it->second <= 0) { 
+                    // Erase returns iterator to the next element
+                    it = bids.erase(it); 
+                    // Remove count entry
+                    bid_counts.erase(current_bid_price); 
                 } else {
-                    ++it; // Move to the next element
+                    ++it; 
                 }
             } else {
                 // If the current bid price is below the trade price, it shouldn't be consumed
-                // by a trade at 'trade_price' (assuming simple price-time priority within levels).
+                // buy a trade at 'trade_price' (assuming simple price-time priority within levels).
                 break;
             }
         }
-    } else if (aggressor_side == 'B') { // Bid aggressor, consuming from Ask side
+        // Bid aggressor, consuming from Ask side
+    } else if (aggressor_side == 'B') { 
         // Iterate asks from best (lowest price) to worst (highest price)
         auto it = asks.begin();
         while (it != asks.end() && remaining_trade_size > 0) {
@@ -108,24 +114,28 @@ void OrderBook::process_trade(char aggressor_side, double trade_price, long long
 
             // We consume asks at or above the trade price (from aggressor's perspective: fill at this price or better).
             // For a BID aggressor, "better" means a higher or equal ask price.
-            if (current_ask_price <= trade_price) { // Assuming trade_price is the limit or better for the other side
+            // Assuming trade_price is the limit or better for the other side
+            if (current_ask_price <= trade_price) { 
                 long long consumed_size = std::min(remaining_trade_size, current_ask_size);
 
-                // Inline logic to reduce quantity
+                // to reduce quantity
                 it->second -= consumed_size;
-                ask_counts.at(current_ask_price)--; // Decrement count of orders at this level
+                // Decrement count of orders at this level
+                ask_counts.at(current_ask_price)--; 
 
                 remaining_trade_size -= consumed_size;
 
-                if (it->second <= 0) { // If the level is fully consumed
-                    it = asks.erase(it); // Erase returns iterator to the next element
-                    ask_counts.erase(current_ask_price); // Remove count entry
+                // If the level is fully consumed
+                if (it->second <= 0) { 
+                    // Erase returns iterator to the next element
+                    it = asks.erase(it); 
+                    // Remove count entry
+                    ask_counts.erase(current_ask_price); 
                 } else {
-                    ++it; // Move to the next element
+                    ++it; 
                 }
             } else {
-                // If the current ask price is above the trade price, it shouldn't be consumed
-                // by a trade at 'trade_price'.
+                // If the current ask price is above the trade price, it shouldn't be consumed by a trade at 'trade_price'.
                 break;
             }
         }

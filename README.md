@@ -47,7 +47,7 @@ The program will generate an output CSV file named `mbp_output.csv` in the same 
   - **Minimal Copying:** Data is processed line by line, minimizing the need to load the entire dataset into memory.
   - **Direct Orderbook Manipulation:** Orderbook updates (add, delete, trade) directly modify the `std::map` containers, avoiding intermediate data structures where possible.
 
-## **5. Special Things to Take Note When Running  Code (Logic Explanation):**
+## **5. Logic Explanation:**
 
 **a. Ignoring Initial Row:**
 
